@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+import os
+import sys
+from flask import Flask, request, Response
+from datetime import datetime
+
+app = Flask(__name__)
+
+@app.route('/healthz')
+def healthz():
+    return 'healthy\n'
+
+@app.route('/')
+def index():
+    x = [
+      'Request Debugging Information',
+      'Request time: %s' % datetime.now().isoformat(),
+      'Please copy the contents of this web page and include it in your support requests',
+      ''
+    ]
+    x.append("%s %s" % (request.method, request.url))
+    x.append('')
+    for a in request.headers:
+        x.append("%s: %s" % (a[0], a[1]))
+    x.append('')
+    sys.stderr.write(" -- ".join(x) + "\n")
+    return Response(response="\n".join(x), status=404, mimetype="text/plain")
+
+@app.errorhandler(404)
+def not_found(error=None):
+    return index()
+		
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8080)
