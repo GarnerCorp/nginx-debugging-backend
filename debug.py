@@ -2,6 +2,7 @@
 
 import os
 import sys
+import urllib.parse
 from flask import Flask, request, Response
 from datetime import datetime
 
@@ -24,7 +25,11 @@ def index():
     for a in request.headers:
         x.append("%s: %s" % (a[0], a[1]))
     x.append('')
-    sys.stderr.write(" -- ".join(x) + "\n")
+    log = " -- ".join(x)
+    data = request.get_data()
+    if data:
+        log += " ---- " + urllib.parse.quote_plus(data)
+    sys.stderr.write(log + "\n")
     return Response(response="\n".join(x), status=404, mimetype="text/plain")
 
 @app.errorhandler(404)
