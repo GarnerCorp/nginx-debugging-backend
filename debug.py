@@ -3,8 +3,10 @@
 import os
 import sys
 import urllib.parse
-from flask import Flask, request, Response
 from datetime import datetime
+
+sys.path.append(os.path.dirname(__file__) + '/lib/python3.9/site-packages')
+from flask import Flask, request, Response
 
 app = Flask(__name__)
 
