@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import http
 import sys
 import urllib.parse
 from datetime import datetime
@@ -32,7 +33,7 @@ def index():
     if data:
         log += " ---- " + urllib.parse.quote_plus(data)
     sys.stderr.write(log + "\n")
-    return Response(response="\n".join(x), status=404, mimetype="text/plain")
+    return Response(response="\n".join(x), status=http.HTTPStatus.NOT_FOUND, mimetype="text/plain")
 
 @app.errorhandler(404)
 def not_found(error=None):
