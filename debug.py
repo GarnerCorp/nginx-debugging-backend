@@ -57,6 +57,8 @@ def special_responses():
     code = request.headers['X-Code']
     if code == "429":
         return too_many_requests()
+    if code == "503":
+        return too_many_requests()
     code_str = str(code)
     try:
         kind = http.HTTPStatus(code)
