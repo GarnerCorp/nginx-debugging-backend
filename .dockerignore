@@ -1,1 +1,3 @@
-.metals
+.*
+README.md
+Dockerfile
