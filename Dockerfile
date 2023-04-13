@@ -1,16 +1,18 @@
 ARG ARCH=
 FROM ${ARCH}python:3.9-slim AS build-env
-ADD . /app
-WORKDIR /app
 
-# Copy the application's requirements.txt and run pip to install all
-# dependencies into the virtualenv.
-ADD requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt --prefix=/app
+COPY . /tmp
+WORKDIR /app
+RUN chown 1000 .
+USER 1000
+
+# Run pip to install all dependencies into the virtualenv.
+RUN pip install -r /tmp/requirements.txt --prefix=/app
 
 # Add the application source code.
 FROM gcr.io/distroless/python3
 COPY --from=build-env /app /app
+COPY --from=build-env /tmp/*.py /tmp/version /app
 
 EXPOSE 8080:8080
 CMD [ "/app/debug.py" ]
