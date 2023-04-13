@@ -92,7 +92,7 @@ def special_responses():
     sys.stderr.write(log + "\n")
     return Response(response="\n".join(x), status=code, mimetype="text/html")
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     if 'X-Code' in request.headers:
         return special_responses()
