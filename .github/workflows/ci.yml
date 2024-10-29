@@ -23,19 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v3
 
-      - name: "Google Auth"
-        uses: "google-github-actions/auth@v1"
+      - name: Authenticate to Google Cloud
+        id: auth-work-identity
+        uses: "google-github-actions/auth@v2"
         with:
-          credentials_json: ${{ secrets.GCR_JSON_KEY }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          version: ${{ vars.GCLOUD_SDK_VERSION }}
-          project_id: ${{ secrets.PROJECT_ID }}
+          workload_identity_provider: "projects/552057127791/locations/global/workloadIdentityPools/github/providers/github"
+          service_account: "container-builder@helical-crowbar-220917.iam.gserviceaccount.com"
 
       - name: Configure GCloud and Docker
         if: ${{ ! env.ACT }}
