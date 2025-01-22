@@ -18,7 +18,8 @@ def healthz():
 @app.route('/429', methods=['GET', 'POST'])
 def too_many_requests():
     headers = {
-        'Retry-After': 30
+        'Retry-After': 30,
+        'Access-Control-Allow-Origin': '*',
     }
     response = [
         '<title>Too many requests</title>',
