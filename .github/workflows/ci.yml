@@ -3,7 +3,7 @@ name: Image CI
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - "README.md"
   pull_request:
