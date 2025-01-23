@@ -31,6 +31,31 @@ def verbose_logging(prefix, request):
         log += " ---- " + urllib.parse.quote_plus(data)
     sys.stderr.write(log + "\n")
 
+@app.route('/', methods=['OPTIONS'])
+def cors_options_fallback():
+    headers = {
+        'access-control-expose-headers': 'X-Trace-Id, X-Trace-Session-Id',
+        'referrer-policy: origin-when-cross-origin': 'strict-origin-when-cross-origin',
+        'x-permitted-cross-domain-policies': 'master-only',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST',
+        'Access-Control-Allow-Origin': '*',
+    }
+    response = [
+        '<title>CORS default response</title>',
+        '',
+        "Your client made a CORS request. That's OK",
+        '',
+    ]
+    verbose_logging('CORS', request)
+    return Response(
+        status=http.HTTPStatus.OK,
+        headers=headers,
+        response="\n".join(response),
+        mimetype="text/html",
+    )
+
 @app.route('/429', methods=['GET', 'POST'])
 def too_many_requests():
     headers = {
