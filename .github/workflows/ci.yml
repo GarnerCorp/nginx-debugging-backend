@@ -59,4 +59,15 @@ jobs:
           image-name: ${{ env.image_name }}
           rc-tag: ${{ steps.get-version.outputs.version }}
           image-tag: ${{ steps.get-version.outputs.version }}
-          additional-image-tags: "${{ env.artifact_registry }}/${{ env.artifact_repository }}/${{ env.image_name }}:rc-${{ github.sha }}"
+          additional-image-tags: |
+            ${{ env.artifact_registry }}/${{ env.artifact_repository }}/${{ env.image_name }}:rc-${{ github.sha }}
+            ${{ github.event_name == 'push' &&
+                github.ref_name == 'main' &&
+                format('{0}/{1}/{2}:prod-{3}',
+                       env.artifact_registry,
+                       env.artifact_repository,
+                       env.image_name,
+                       steps.get-version.outputs.version
+                ) ||
+                ''
+            }}
