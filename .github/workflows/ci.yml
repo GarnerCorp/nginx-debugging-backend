@@ -19,7 +19,7 @@ env:
   image_name: nginx-debugging-backend
 
 concurrency:
-  group: ${{ github.workflow_ref }}
+  group: ${{ github.workflow_ref }}-${{ github.actor }}
   cancel-in-progress: true
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
     name: Build and Push Image
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v3
@@ -47,18 +47,31 @@ jobs:
       
       - name: Get version
         id: get-version
+        if: github.event_name != 'push'
         shell: bash
         run: |
           version=$(head -1 version)
           echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump-version
+        uses: garnercorp/build-actions/bump-version@main
+        if: github.event_name == 'push'
+        with:
+          version-type: raw
+          version-file-path: version
+          git-name: "jenkins"
+          git-email: "jenkins@garnercorp.com"
+          major: changelogs/major
+          minor: changelogs/minor
 
       - name: Build and Push Docker Image
         uses: garnercorp/build-actions/image@main
         with:
           container-project: ${{ secrets.PROJECT_ID }}
           image-name: ${{ env.image_name }}
-          rc-tag: ${{ steps.get-version.outputs.version }}
-          image-tag: ${{ steps.get-version.outputs.version }}
+          rc-tag: ${{ steps.get-version.outputs.version || steps.bump-version.outputs.version }}
+          image-tag: ${{ steps.get-version.outputs.version  || steps.bump-version.outputs.version }}
           additional-image-tags: |
             ${{ env.artifact_registry }}/${{ env.artifact_repository }}/${{ env.image_name }}:rc-${{ github.sha }}
             ${{ github.event_name == 'push' &&
@@ -67,7 +80,7 @@ jobs:
                        env.artifact_registry,
                        env.artifact_repository,
                        env.image_name,
-                       steps.get-version.outputs.version
+                       steps.get-version.outputs.version || steps.bump-version.outputs.version
                 ) ||
                 ''
             }}
