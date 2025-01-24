@@ -1,0 +1,13 @@
+Cloudant
+distroless
+garnercorp
+gcr
+healthz
+jenkins
+Mailchimp
+nginx
+Sendgrid
+Twilio
+usr
+WORKDIR
+yml
