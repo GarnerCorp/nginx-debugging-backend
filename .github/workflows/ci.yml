@@ -4,11 +4,17 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - "README.md"
+    paths:
+      - Dockerfile
+      - debug.py
+      - requirements.txt
+      - .github/workflows/ci.yml
   pull_request:
-    paths-ignore:
-      - "README.md"
+    paths:
+      - Dockerfile
+      - debug.py
+      - requirements.txt
+      - .github/workflows/ci.yml
 
 permissions:
   contents: read
@@ -27,10 +33,19 @@ jobs:
     name: Build and Push Image
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout for pushing to protected branch
+        uses: actions/checkout@v4
+        id: checkout-protected
+        if: github.event_name == 'push' || contains(github.actor, 'Garner')
+        with:
+          ssh-key: "${{ secrets.CHECK_SPELLING }}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        if: steps.checkout-protected.conclusion == 'skipped'
 
       - name: Authenticate to Google Cloud
         id: auth-work-identity
@@ -47,7 +62,7 @@ jobs:
       
       - name: Get version
         id: get-version
-        if: github.event_name != 'push'
+        if: steps.checkout-protected.conclusion == 'skipped'
         shell: bash
         run: |
           version=$(head -1 version)
@@ -56,7 +71,7 @@ jobs:
       - name: Bump version
         id: bump-version
         uses: garnercorp/build-actions/bump-version@main
-        if: github.event_name == 'push'
+        if: steps.checkout-protected.conclusion != 'skipped'
         with:
           version-type: raw
           version-file-path: version
