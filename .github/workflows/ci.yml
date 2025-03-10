@@ -39,7 +39,7 @@ jobs:
       - name: Checkout for pushing to protected branch
         uses: actions/checkout@v4
         id: checkout-protected
-        if: github.event_name == 'push' || contains(github.actor, 'Garner')
+        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
         with:
           ssh-key: "${{ secrets.CHECK_SPELLING }}"
 
