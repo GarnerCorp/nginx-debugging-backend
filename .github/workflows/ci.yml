@@ -53,12 +53,6 @@ jobs:
         with:
           workload_identity_provider: "projects/552057127791/locations/global/workloadIdentityPools/github/providers/github"
           service_account: "container-builder@helical-crowbar-220917.iam.gserviceaccount.com"
-
-      - name: Configure GCloud and Docker
-        if: ${{ ! env.ACT }}
-        shell: bash
-        run: |
-          gcloud auth configure-docker
       
       - name: Get version
         id: get-version
@@ -81,21 +75,31 @@ jobs:
           minor: changelogs/minor
 
       - name: Build and Push Docker Image
+        id: build
         uses: garnercorp/build-actions/image@main
+        env:
+          version: ${{ steps.get-version.outputs.version || steps.bump-version.outputs.version }}
         with:
+          container-registry: ${{ env.artifact_registry }}
           container-project: ${{ secrets.PROJECT_ID }}
           image-name: ${{ env.image_name }}
-          rc-tag: ${{ steps.get-version.outputs.version || steps.bump-version.outputs.version }}
-          image-tag: ${{ steps.get-version.outputs.version  || steps.bump-version.outputs.version }}
+          rc-tag: ${{ env.version }}
+          image-tag: ${{ env.version }}
           additional-image-tags: |
             ${{ env.artifact_registry }}/${{ env.artifact_repository }}/${{ env.image_name }}:rc-${{ github.sha }}
-            ${{ github.event_name == 'push' &&
-                github.ref_name == 'main' &&
-                format('{0}/{1}/{2}:prod-{3}',
-                       env.artifact_registry,
-                       env.artifact_repository,
-                       env.image_name,
-                       steps.get-version.outputs.version || steps.bump-version.outputs.version
-                ) ||
-                ''
-            }}
+
+      - name: Copy image to extra repositories
+        if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+        uses: GarnerCorp/build-actions/copy-image@main
+        env:
+          rest: >-
+            ${{ steps.bump-version.outputs.version && format('images/{0}:prod-{1}', env.image_name, steps.bump-version.outputs.version) ||
+                format('images/{0}:rc-{1}-{2}', env.image_name, steps.get-version.outputs.version, github.sha) }}
+        with:
+          source: ${{ steps.build.outputs.image }}
+          destinations: >-
+            ${{ format('{0}/{1}', secrets.ARTIFACT_REPOSITORY_1, env.rest) }}
+            ${{ format('{0}/{1}', secrets.ARTIFACT_REPOSITORY_2, env.rest) }}
+            ${{ format('{0}/{1}', secrets.ARTIFACT_REPOSITORY_3, env.rest) }}
+            ${{ format('{0}/{1}', secrets.ARTIFACT_REPOSITORY_4, env.rest) }}
+            ${{ format('{0}/{1}', secrets.ARTIFACT_REPOSITORY_5, env.rest) }}
