@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}python:3.9-slim AS build-env
+FROM ${ARCH}python:3.13-slim AS build-env
 
 COPY . /tmp
 WORKDIR /app
