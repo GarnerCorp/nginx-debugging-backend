@@ -1,7 +1,7 @@
 ARG ARCH=
 FROM ${ARCH}python:3.13-slim AS build-env
 
-COPY . /tmp
+COPY debug.py requirements.txt version /tmp
 WORKDIR /app
 RUN chown 1000 .
 USER 1000
