@@ -14,5 +14,5 @@ FROM gcr.io/distroless/python3
 COPY --from=build-env /app /app
 COPY --from=build-env /tmp/*.py /tmp/version /app
 
-EXPOSE 8080:8080
+EXPOSE 8080
 CMD [ "/app/debug.py" ]
