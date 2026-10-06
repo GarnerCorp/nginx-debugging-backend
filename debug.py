@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import os
+import platform
 import http
 import sys
 import urllib.parse
 from datetime import datetime
 
-sys.path.append(os.path.dirname(__file__) + '/lib/python3.9/site-packages')
+sys.path.append(os.path.dirname(__file__) + '/lib/python'+'.'.join(platform.python_version_tuple()[0:2])+'/site-packages')
 from flask import Flask, request, Response
 
 app = Flask(__name__)
