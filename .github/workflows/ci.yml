@@ -37,14 +37,14 @@ jobs:
       id-token: write
     steps:
       - name: Checkout for pushing to protected branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         id: checkout-protected
         if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
         with:
           ssh-key: "${{ secrets.CHECK_SPELLING }}"
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         if: steps.checkout-protected.conclusion == 'skipped'
 
       - name: Authenticate to Google Cloud
