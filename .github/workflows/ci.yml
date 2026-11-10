@@ -64,7 +64,7 @@ jobs:
 
       - name: Bump version
         id: bump-version
-        uses: garnercorp/build-actions/bump-version@main
+        uses: GarnerCorp/build-actions/bump-version@main
         if: steps.checkout-protected.conclusion != 'skipped'
         with:
           version-type: raw
@@ -76,7 +76,7 @@ jobs:
 
       - name: Build and Push Docker Image
         id: build
-        uses: garnercorp/build-actions/image@main
+        uses: GarnerCorp/build-actions/image@main
         env:
           version: ${{ steps.get-version.outputs.version || steps.bump-version.outputs.version }}
         with:
